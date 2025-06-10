@@ -21,7 +21,31 @@ namespace PrintersManagerBackend.Controllers
         public async Task<IActionResult> GetAll()
         {
             var printers = await _context.Printers.Include(p => p.PrinterStatistic).ThenInclude(ps => ps.TonerStatistic).ToListAsync();
-            return Ok(printers);
+
+            var DTOPrinters = printers.Select(p => new Printer
+            {
+                Id = p.Id,
+                IP = p.IP,
+                Name = p.Name,
+                Port = p.Port,
+                PrinterStatistic = p.PrinterStatistic is null ? null : new PrinterStatistic
+                {
+                    Id = p.PrinterStatistic.Id,
+                    State = p.PrinterStatistic.State,
+                    Status = p.PrinterStatistic.Status,
+                    PrintStatus = p.PrinterStatistic.PrintStatus,
+                    PagesNumber = p.PrinterStatistic.PagesNumber,
+                    WorkTime = p.PrinterStatistic.WorkTime,
+                    TonerStatistic = p.PrinterStatistic.TonerStatistic is null ? null : p.PrinterStatistic.TonerStatistic.Select(ts => new TonerStatistic
+                    {
+                        Color = ts.Color,
+                        Total = ts.Total,
+                        Spent = ts.Spent
+                    }).ToList()
+                }
+            });
+
+            return Ok(DTOPrinters);
         }
         [HttpPost]
         public async Task<IActionResult> Post(Printer printer)
