@@ -22,13 +22,34 @@ namespace PrintersManagerBackend.Controllers
             var models = await _context.Models.Include(m => m.Toners).ToListAsync();
             if(models is null)
                 return NotFound();
-            return Ok(models);
+
+            var DTOModels = models.Select(m => new Model
+            {
+                Id = m.Id,
+                Name = m.Name,
+                State = m.State,
+                Status = m.Status,
+                PrintStatus = m.PrintStatus,
+                PagesNumber = m.PagesNumber,
+                WorkTime = m.WorkTime,
+                Toners = m.Toners.Select(t => new Toner
+                {
+                    Id = t.Id,
+                    Color = t.Color,
+                    Total = t.Total,
+                    Spent = t.Spent
+                }).ToList()
+
+            }).ToList();
+
+            return Ok(DTOModels);
         }
         [HttpPost]
         public async Task<IActionResult> Post(Model model)
         {
             var newModel = new Model
             {
+                Name = model.Name,
                 PagesNumber = model.PagesNumber,
                 PrintStatus = model.PrintStatus,
                 State = model.State,
@@ -37,6 +58,10 @@ namespace PrintersManagerBackend.Controllers
             };
             _context.Models.Add(newModel);
             await _context.SaveChangesAsync();
+
+            if (newModel.Toners is null)
+                newModel.Toners = [];
+            
             foreach (var toner in model.Toners)
                 newModel.Toners.Add(new Toner
                 {
