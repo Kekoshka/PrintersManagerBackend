@@ -48,6 +48,7 @@ namespace PrintersManagerBackend.Services
                                   new Variable(new ObjectIdentifier(printer.Model.PagesNumber)),
                           });
 
+                    printerStatistic.PrinterId = printer.Id;
                     printerStatistic.State = basicStatistic[0].Data.ToString();
                     printerStatistic.Status = basicStatistic[1].Data.ToString();
                     printerStatistic.PrintStatus = basicStatistic[2].Data.ToString();
@@ -73,9 +74,18 @@ namespace PrintersManagerBackend.Services
                     }
                     updatedPrinterStatisticList.Add(printerStatistic);
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    PrinterStatistic ps = new()
+                    {
+                        PrinterId = printer.Id,
+                        PagesNumber = ex.Message,
+                        State = ex.Message,
+                        Status = ex.Message,
+                        PrintStatus = ex.Message,
+                        WorkTime = ex.Message
+                    };
+                    updatedPrinterStatisticList.Add(ps);
                 }
             }
 

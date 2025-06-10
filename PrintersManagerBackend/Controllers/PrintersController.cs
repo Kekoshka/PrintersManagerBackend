@@ -53,6 +53,7 @@ namespace PrintersManagerBackend.Controllers
             Printer newPrinter = new()
             {
                 IP = printer.IP,
+                Port = printer.Port,
                 ModelId = printer.ModelId,
                 Name = printer.Name,
             };
